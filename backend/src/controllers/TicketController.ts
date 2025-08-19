@@ -154,14 +154,18 @@ export const update = async (
 
   const ticketData: TicketData = { ...req.body, tenantId };
 
-  const { ticket } = await UpdateTicketService({
+  const { ticket, oldStatus } = await UpdateTicketService({
     ticketData,
     ticketId,
     isTransference,
     userIdRequest
   });
 
-  if (ticket.status === "closed") {
+  if (
+    ticket.status === "closed" &&
+    oldStatus !== "closed" &&
+    !ticket.isFarewellMessage
+  ) {
     const whatsapp = await Whatsapp.findOne({
       where: { id: ticket.whatsappId, tenantId }
     });
